@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Interativo: Manifestações Hemorrágicas das Arboviroses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is designed with a thematic, top-down structure to facilitate learning. It starts with a broad 'Visão Geral' (Overview), then allows focused exploration in 'Principais Arboviroses' using interactive tabs. It delves into the 'how' with a visual 'Mecanismos Fisiopatológicos' diagram, provides a 'Comparativo de Sintomas' with an interactive radar chart for easy comparison, and concludes with actionable 'Sinais de Alerta' and 'Prevenção' sections. This user flow guides the user from general knowledge to specific, comparative, and practical information, which is more intuitive and engaging than a linear report. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Overview of different arboviruses. -> Goal: Inform & Compare. -> Viz/Presentation Method: Interactive content panes. -> Interaction: Clickable buttons to switch between virus details. -> Justification: Allows users to focus on one disease at a time without being overwhelmed, promoting clearer understanding. -> Library/Method: Vanilla JS DOM manipulation.
+        - Report Info: Symptom profiles across diseases. -> Goal: Compare. -> Viz/Presentation Method: Radar Chart. -> Interaction: Checkboxes to dynamically add/remove viruses from the chart. -> Justification: A radar chart provides an immediate, powerful visual comparison of multiple quantitative/qualitative variables (symptom severity) across different categories (viruses). -> Library/Method: Chart.js.
+        - Report Info: Pathophysiological process of hemorrhage. -> Goal: Explain a complex process. -> Viz/Presentation Method: Simplified flowchart diagram. -> Interaction: None, focus on clarity. -> Justification: A visual diagram built with HTML/CSS is more digestible than a dense block of text, breaking down the mechanism into sequential steps. -> Library/Method: HTML + Tailwind CSS.
+        - Report Info: Key warning signs and prevention methods. -> Goal: Inform & Action. -> Viz/Presentation Method: Icon-driven cards. -> Interaction: None, focus on readability. -> Justification: Cards with icons quickly draw attention to critical, actionable information. -> Library/Method: HTML + Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #3f3c3a;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #c7a17a;
+        }
+        .active-nav-link {
+            color: #c7a17a;
+            border-bottom: 2px solid #c7a17a;
+        }
+        .virus-btn.active {
+            background-color: #c7a17a;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-[#8c6f52]">Arboviroses & Hemorragia</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link pb-1">Visão Geral</a>
+                <a href="#viruses" class="nav-link pb-1">Arboviroses</a>
+                <a href="#mechanism" class="nav-link pb-1">Mecanismos</a>
+                <a href="#comparison" class="nav-link pb-1">Comparativo</a>
+                <a href="#warning" class="nav-link pb-1">Alerta</a>
+            </div>
+             <button id="mobile-menu-button" class="md:hidden text-2xl">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white px-6 pb-4">
+            <a href="#overview" class="block py-2 nav-link">Visão Geral</a>
+            <a href="#viruses" class="block py-2 nav-link">Arboviroses</a>
+            <a href="#mechanism" class="block py-2 nav-link">Mecanismos</a>
+            <a href="#comparison" class="block py-2 nav-link">Comparativo</a>
+            <a href="#warning" class="block py-2 nav-link">Alerta</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="overview" class="mb-20 text-center">
+            <h2 class="text-4xl font-bold text-[#8c6f52] mb-4">Entendendo as Manifestações Hemorrágicas</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600">
+                Arboviroses como Dengue, Zika, Chikungunya e Febre Amarela são um desafio de saúde pública. Embora a maioria dos casos seja leve, algumas infecções podem evoluir para formas graves com sangramentos. Esta aplicação interativa foi criada para explorar por que e como isso acontece, comparando as principais doenças e destacando os sinais de alerta cruciais.
+            </p>
+        </section>
+
+        <section id="viruses" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-[#8c6f52] mb-3">Principais Arboviroses com Potencial Hemorrágico</h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    Clique em cada doença para explorar suas características, sintomas e o risco específico de manifestações hemorrágicas.
+                </p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button data-virus="dengue" class="virus-btn active text-lg font-semibold py-3 px-6 rounded-full shadow-sm bg-white hover:bg-gray-100 transition-all duration-300">Dengue</button>
+                <button data-virus="zika" class="virus-btn text-lg font-semibold py-3 px-6 rounded-full shadow-sm bg-white hover:bg-gray-100 transition-all duration-300">Zika</button>
+                <button data-virus="chikungunya" class="virus-btn text-lg font-semibold py-3 px-6 rounded-full shadow-sm bg-white hover:bg-gray-100 transition-all duration-300">Chikungunya</button>
+                <button data-virus="febre_amarela" class="virus-btn text-lg font-semibold py-3 px-6 rounded-full shadow-sm bg-white hover:bg-gray-100 transition-all duration-300">Febre Amarela</button>
+            </div>
+
+            <div id="virus-info-container" class="bg-white p-8 rounded-2xl shadow-lg transition-opacity duration-500 min-h-[300px]">
+            </div>
+        </section>
+
+        <section id="mechanism" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-[#8c6f52] mb-3">Mecanismos Fisiopatológicos da Hemorragia</h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    O sangramento nas arboviroses não é causado por um único fator, mas por uma cascata de eventos no organismo. Este diagrama simplificado mostra os principais mecanismos envolvidos.
+                </p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-center">
+                <div class="p-4 border-2 border-gray-200 rounded-lg w-full md:w-1/4">
+                    <div class="text-3xl mb-2">1</div>
+                    <h3 class="font-bold text-lg text-[#c7a17a]">Infecção Viral</h3>
+                    <p class="text-sm">O vírus entra na corrente sanguínea e se replica.</p>
+                </div>
+                <div class="text-2xl font-bold text-gray-400">→</div>
+                <div class="p-4 border-2 border-gray-200 rounded-lg w-full md:w-1/4">
+                    <div class="text-3xl mb-2">2</div>
+                    <h3 class="font-bold text-lg text-[#c7a17a]">Resposta Imune</h3>
+                    <p class="text-sm">O corpo libera citocinas para combater o vírus, causando inflamação.</p>
+                </div>
+                 <div class="text-2xl font-bold text-gray-400">→</div>
+                <div class="p-4 border-2 border-orange-200 bg-orange-50 rounded-lg w-full md:w-1/4">
+                     <div class="text-3xl mb-2">3</div>
+                    <h3 class="font-bold text-lg text-orange-600">Disfunção Vascular</h3>
+                    <p class="text-sm">As citocinas danificam os vasos, causando queda de plaquetas (trombocitopenia) e aumento da permeabilidade vascular (extravasamento de plasma).</p>
+                </div>
+                 <div class="text-2xl font-bold text-gray-400">→</div>
+                 <div class="p-4 border-2 border-red-200 bg-red-50 rounded-lg w-full md:w-1/4">
+                    <div class="text-3xl mb-2">4</div>
+                    <h3 class="font-bold text-lg text-red-600">Hemorragia</h3>
+                    <p class="text-sm">A combinação de poucas plaquetas e vasos "vazando" leva a sangramentos espontâneos.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="mb-20">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-[#8c6f52] mb-3">Comparativo Interativo de Sintomas</h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    Selecione as doenças que deseja comparar. O gráfico mostra a intensidade típica de cada sintoma, ajudando a visualizar as diferenças e semelhanças entre elas.
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="chart-container h-[40vh] md:h-96 max-h-[500px]">
+                    <canvas id="symptomChart"></canvas>
+                </div>
+                <div id="chart-controls" class="flex flex-wrap justify-center gap-4 mt-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="warning" class="mb-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-[#8c6f52] mb-3">Sinais de Alerta: Quando Procurar Ajuda Médica Urgente</h2>
+                 <p class="max-w-2xl mx-auto text-gray-600">
+                    A identificação precoce dos sinais de alarme é fundamental para prevenir a evolução para formas graves da doença. Fique atento a estes sintomas, especialmente após a febre começar a baixar.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="text-4xl mr-4">🩸</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Sangramentos</h3>
+                        <p class="text-gray-600">Gengiva, nariz, manchas vermelhas na pele (petéquias), ou qualquer sangramento incomum.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="text-4xl mr-4">🤢</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Vômitos Persistentes</h3>
+                        <p class="text-gray-600">Vomitar repetidamente, o que pode levar à desidratação.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="text-4xl mr-4">😵</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Dor Abdominal Intensa</h3>
+                        <p class="text-gray-600">Dor forte e contínua na região da barriga.</p>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="text-4xl mr-4">🤕</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Letargia ou Irritabilidade</h3>
+                        <p class="text-gray-600">Sonolência excessiva, confusão mental ou irritação extrema.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                     <div class="text-4xl mr-4">📉</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Hipotensão Postural</h3>
+                        <p class="text-gray-600">Tontura e sensação de desmaio ao se levantar.</p>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                     <div class="text-4xl mr-4">🌊</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Acúmulo de Líquidos</h3>
+                        <p class="text-gray-600">Inchaço no corpo (ascite, derrame pleural).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="prevention" class="mt-20 pt-10 border-t">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-[#8c6f52] mb-3">Prevenção: A Melhor Estratégia</h2>
+                 <p class="max-w-2xl mx-auto text-gray-600">
+                    A luta contra as arboviroses é coletiva. A principal forma de prevenção é a eliminação dos criadouros do mosquito Aedes aegypti.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-5xl mb-3">💧</div>
+                    <h3 class="font-semibold text-lg">Elimine Água Parada</h3>
+                    <p class="text-gray-600 text-sm">Vasos de plantas, pneus velhos, garrafas e calhas são criadouros perfeitos.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-5xl mb-3">🗑️</div>
+                    <h3 class="font-semibold text-lg">Mantenha o Lixo Fechado</h3>
+                    <p class="text-gray-600 text-sm">Descarte o lixo em sacos plásticos bem fechados e mantenha a lixeira tampada.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-5xl mb-3">🦟</div>
+                    <h3 class="font-semibold text-lg">Use Repelente</h3>
+                    <p class="text-gray-600 text-sm">Aplique repelente nas áreas expostas da pele, principalmente durante o dia.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-5xl mb-3">💉</div>
+                    <h3 class="font-semibold text-lg">Vacine-se</h3>
+                    <p class="text-gray-600 text-sm">A vacina é a principal forma de prevenção contra a Febre Amarela e está disponível para Dengue.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 mt-20">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-600">
+            <p>Esta é uma ferramenta educacional. As informações não substituem a consulta médica.</p>
+            <p class="text-sm mt-2">Desenvolvido como uma aplicação interativa para facilitar o entendimento das arboviroses.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const virusData = {
+                dengue: {
+                    title: "Dengue",
+                    description: "É a arbovirose com maior risco de complicações hemorrágicas. A infecção secundária por um sorotipo diferente do vírus aumenta significativamente o risco de Dengue Grave (Hemorrágica).",
+                    symptoms: [
+                        "Febre alta e abrupta",
+                        "Dor de cabeça e atrás dos olhos",
+                        "Dores musculares e articulares intensas",
+                        "Manchas vermelhas na pele (exantema)",
+                        "Falta de apetite e náuseas"
+                    ],
+                    hemorrhage_risk: "Alto",
+                    hemorrhage_manifestations: "Petéquias (pontos vermelhos), sangramento nasal (epistaxe), sangramento gengival, e em casos graves, hemorragias internas e choque."
+                },
+                zika: {
+                    title: "Zika Vírus",
+                    description: "Geralmente causa uma doença mais branda. As manifestações hemorrágicas são raras e, quando ocorrem, são leves. A principal preocupação é a associação com a microcefalia em bebês.",
+                    symptoms: [
+                        "Febre baixa ou ausente",
+                        "Exantema (manchas na pele) com coceira",
+                        "Conjuntivite não purulenta",
+                        "Dores articulares, principalmente em mãos e pés",
+                        "Dor de cabeça"
+                    ],
+                    hemorrhage_risk: "Muito Baixo",
+                    hemorrhage_manifestations: "Manifestações hemorrágicas são atípicas, mas podem incluir petéquias leves em alguns casos."
+                },
+                chikungunya: {
+                    title: "Chikungunya",
+                    description: "A principal característica são as dores articulares incapacitantes, que podem se tornar crônicas. O risco de hemorragia é baixo, mas pode ocorrer, principalmente em neonatos e idosos.",
+                    symptoms: [
+                        "Febre alta e de início súbito",
+                        "Dores articulares intensas e incapacitantes",
+                        "Inchaço nas articulações",
+                        "Exantema",
+                        "Dor de cabeça e muscular"
+                    ],
+                    hemorrhage_risk: "Baixo",
+                    hemorrhage_manifestations: "Sangramentos gengivais e nasais podem ocorrer, mas hemorragias graves são raras."
+                },
+                febre_amarela: {
+                    title: "Febre Amarela",
+                    description: "É uma doença grave com alta letalidade na sua forma tóxica. O dano hepático severo leva a icterícia (pele amarelada) e a uma falha na produção de fatores de coagulação, resultando em hemorragias graves.",
+                    symptoms: [
+                        "Início súbito de febre alta",
+                        "Calafrios, dor de cabeça intensa",
+                        "Dores nas costas e no corpo",
+                        "Náuseas e vômitos",
+                        "Fase tóxica: Icterícia, dor abdominal, vômitos com sangue"
+                    ],
+                    hemorrhage_risk: "Muito Alto (na forma grave)",
+                    hemorrhage_manifestations: "Vômito com aspecto de 'borra de café' (hematêmese), sangramento nasal, gengival, e falência de múltiplos órgãos."
+                }
+            };
+            
+            const virusInfoContainer = document.getElementById('virus-info-container');
+            const virusButtons = document.querySelectorAll('.virus-btn');
+
+            function updateVirusInfo(virusKey) {
+                const data = virusData[virusKey];
+                if (!data) return;
+
+                const symptomsList = data.symptoms.map(symptom => `<li class="flex items-start"><span class="text-[#c7a17a] mr-2 mt-1">✓</span>${symptom}</li>`).join('');
+
+                virusInfoContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-[#8c6f52] mb-4">${data.title}</h3>
+                    <p class="mb-6 text-gray-600">${data.description}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2 border-b pb-1">Sintomas Comuns</h4>
+                            <ul class="space-y-2 text-gray-700">${symptomsList}</ul>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-lg mb-2">Risco Hemorrágico</h4>
+                            <p class="font-bold text-xl ${data.hemorrhage_risk.includes('Alto') ? 'text-red-600' : (data.hemorrhage_risk.includes('Baixo') ? 'text-amber-600' : 'text-green-600')} mb-4">${data.hemorrhage_risk}</p>
+                            <h4 class="font-semibold text-lg mb-2">Manifestações Típicas</h4>
+                            <p class="text-gray-700">${data.hemorrhage_manifestations}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            virusButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    virusButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const virusKey = button.getAttribute('data-virus');
+                    updateVirusInfo(virusKey);
+                });
+            });
+
+            updateVirusInfo('dengue');
+
+            const symptomData = {
+                labels: ['Febre', 'Dor Articular', 'Manchas Pele', 'Dor de Cabeça', 'Sintomas Hemorrágicos', 'Comprom. Hepático'],
+                datasets: {
+                    dengue: {
+                        label: 'Dengue',
+                        data: [9, 7, 7, 8, 8, 5],
+                        borderColor: 'rgba(220, 38, 38, 1)',
+                        backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                        hidden: false
+                    },
+                    zika: {
+                        label: 'Zika',
+                        data: [4, 6, 9, 5, 1, 1],
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                        hidden: false
+                    },
+                    chikungunya: {
+                        label: 'Chikungunya',
+                        data: [9, 10, 6, 7, 2, 2],
+                        borderColor: 'rgba(251, 146, 60, 1)',
+                        backgroundColor: 'rgba(251, 146, 60, 0.2)',
+                        hidden: false
+                    },
+                    febre_amarela: {
+                        label: 'Febre Amarela',
+                        data: [9, 5, 4, 8, 9, 10],
+                        borderColor: 'rgba(234, 179, 8, 1)',
+                        backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                        hidden: true
+                    }
+                }
+            };
+            
+            const chartControlsContainer = document.getElementById('chart-controls');
+            Object.keys(symptomData.datasets).forEach(key => {
+                const virus = symptomData.datasets[key];
+                const controlHtml = `
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="chart-toggle" value="${key}" ${!virus.hidden ? 'checked' : ''}>
+                        <span class="ml-2" style="color: ${virus.borderColor};">${virus.label}</span>
+                    </label>
+                `;
+                chartControlsContainer.innerHTML += controlHtml;
+            });
+
+            const ctx = document.getElementById('symptomChart').getContext('2d');
+            let symptomChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: symptomData.labels,
+                    datasets: Object.values(symptomData.datasets).filter(d => !d.hidden)
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            pointLabels: {
+                                font: {
+                                    size: 12
+                                }
+                            },
+                             ticks: {
+                                stepSize: 2,
+                                backdropColor: 'rgba(255, 255, 255, 0.75)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}/10`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const chartToggles = document.querySelectorAll('.chart-toggle');
+            chartToggles.forEach(toggle => {
+                toggle.addEventListener('change', () => {
+                    const selectedViruses = Array.from(chartToggles)
+                        .filter(i => i.checked)
+                        .map(i => i.value);
+                    
+                    symptomChart.data.datasets = selectedViruses.map(key => symptomData.datasets[key]);
+                    symptomChart.update();
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav-link');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active-nav-link');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
